@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <setParameter name="IIS Web Application Name" value="MyWebAppForDeployment" />
+  <setParameter name="My Setting" value="Unspecified" />
+  <setParameter name="DefaultConnection-Web.config Connection String" value="Data Source=(LocalDb)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\aspnet-MyWebAppForDeployment-20150219023011.mdf;Initial Catalog=aspnet-MyWebAppForDeployment-20150219023011;Integrated Security=True" />
+  <setParameter name="MyConnectionString-Web.config Connection String" value="Data Source=.\sqlexpress;Initial Catalog=foo;Integrated Security=SSPI" />
+</parameters>

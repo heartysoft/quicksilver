@@ -29,6 +29,15 @@ module Settings =
         }
 
     let defaultPackageConventionRecord = {PackageConventionRecord.Type = GitTag}
+
+    type PublishSettingsRecord = 
+        {
+            WebsitesRoot : string option
+        }
+    let defaultPublishSettingsRecord = 
+        {
+            WebsitesRoot = None
+        }
     
     type SettingsRecord = 
         { 
@@ -36,6 +45,7 @@ module Settings =
             TestSettings : TestSettingsRecord 
             WebsitePackages : WebsitePackageRecord
             PackageConvention : PackageConventionRecord
+            PublishSettings : PublishSettingsRecord
         }
         member this.Build f = 
             {this with BuildSettings = f(this.BuildSettings)}
@@ -44,15 +54,18 @@ module Settings =
             {this with TestSettings = f(this.TestSettings)}
         member this.Websites f = 
             {this with WebsitePackages = f(this.WebsitePackages)}
+        member this.WebsitesPublishRoot path = 
+            {this with PublishSettings = {this.PublishSettings with WebsitesRoot = Some(path)}}
 
-    
     let settings = {
             BuildSettings = defaultBuildSettings
             TestSettings = defaultTestSettings
             WebsitePackages = defaultWebsitePackages
             PackageConvention = defaultPackageConventionRecord
+            PublishSettings = defaultPublishSettingsRecord
         }
 
     let build f (settings:SettingsRecord) = settings.Build(f)
     let nunit f (settings:SettingsRecord) = settings.NUnit(f)
     let websites f (settings:SettingsRecord) = settings.Websites f
+    let websitesPublishRoot path (settings:SettingsRecord) = settings.WebsitesPublishRoot path

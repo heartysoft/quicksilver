@@ -69,58 +69,75 @@ Target "NUnit" (fun _ ->
     )
 )
 
-Target "Package" (fun _ ->
-    //only GitTag for now.
-    let version = 
-        try
-            Some(runSimpleGitCommand root "describe --abbrev=0 --tags --exact-match")
-        with
-            | _ -> None
-    
-    match version with
-    | Some(v) -> trace v
-    | _ -> trace "Current commit is not tagged. Will not package."
-//    let version = 
-//        match settings.PackageConvention.Type with
-//        | QuickSilver.Settings.PackageConventionType.GitTag ->
-            
+//only GitTag for now.
+let version = 
+    try
+        Some(runSimpleGitCommand root "describe --abbrev=0 --tags --exact-match --match v*")
+    with
+        | _ -> None
 
-//    let setParams proj x = 
-//        let projFile = (fileInfo proj)
-//        let fileName = projFile.Name
-//        let projName = 
-//            fileName.Substring(0, fileName.Length - projFile.Extension.Length)
-//        let outProjDir = outDir + projName + @"/"
-//        {x with 
-//            Verbosity = Some(Quiet);
-//            Targets = ["Package"];
-//            Properties = 
-//                [
-//                    "Configuration", buildMode
-//                    "DebugSymbols", "True"
-//                    "Optimize", buildSettings.optimize.ToString()
-//                    "PackageLocation", outProjDir + projName + ".zip"
-//                    "DeployIisAppPath", projName
-//                    "DesktopBuildPackageLocation", projName
-//                ]
-//        }
-//
-//    
-//    settings.WebsitePackages.projFiles
-//    |> List.iter (fun pattern ->
-//        !!pattern
-//        |> Seq.iter (fun proj ->
-//            proj
-//            |> build (setParams proj)
-//            |> ignore 
-//        )
-//    )
+Target "Package" (fun _ ->
+    if version.IsNone then
+        trace "Commit not tagged with v* tag. Not packaging."
+    else
+        let v = version.Value
+
+        let getTargetDetails proj = 
+            let projFile = (fileInfo proj)
+            let fileName = projFile.Name
+            let projName = 
+                fileName.Substring(0, fileName.Length - projFile.Extension.Length)
+            let outProjDir = outDir + projName + @"/" + v + @"/"
+            (projName, outProjDir)
+
+        let setParams (projName, outProjDir) x = 
+            {x with 
+                Verbosity = Some(Quiet);
+                Targets = ["Package"];
+                Properties = 
+                    [
+                        "Configuration", buildMode
+                        "DebugSymbols", "True"
+                        "Optimize", buildSettings.optimize.ToString()
+                        "PackageLocation", outProjDir + projName + ".zip"
+                        "DeployIisAppPath", projName
+                        "DesktopBuildPackageLocation", projName
+                    ]
+            }
+
+        let copyMSDeployEnvs (projName, outProjDir) = 
+            let target = root + @"env/" + projName
+            trace target
+            if(FileSystemHelper.directoryExists(target)) then
+                CopyDir(outProjDir) target (fun _->true)
+    
+        settings.WebsitePackages.projFiles
+        |> List.iter (fun pattern ->
+            !!pattern
+            |> Seq.iter (fun proj ->
+                let targetDetails = getTargetDetails proj
+                
+                proj
+                |> build (setParams targetDetails)
+                |> ignore 
+
+                copyMSDeployEnvs targetDetails
+            )
+        )
+)
+
+Target "Publish" (fun _ ->
+    if(version.IsSome) then 
+        ()
+    else
+        ()
 )
 
 "Clean"
     ==> "Build"
     ==> "NUnit"
-//    ==> "Package"
+    ==> "Package"
+    ==> "Publish"
 
 // start build
-RunTargetOrDefault "NUnit"
+RunTargetOrDefault "Publish"

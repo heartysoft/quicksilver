@@ -12,5 +12,6 @@ let settings =
     |> websites (fun p ->
         {p with projFiles = [@"**\MyWebAppForDeployment.csproj"]}
     )
+    |> websitesPublishRoot @"D:/woohoo"
 
 
