@@ -76,19 +76,19 @@ let version =
     with
         | _ -> None
 
+let getTargetDetails proj v = 
+    let projFile = (fileInfo proj)
+    let fileName = projFile.Name
+    let projName = 
+        fileName.Substring(0, fileName.Length - projFile.Extension.Length)
+    let outProjDir = outDir + projName + @"/" + v + @"/"
+    (projName, outProjDir)
+
 Target "Package" (fun _ ->
     if version.IsNone then
         trace "Commit not tagged with v* tag. Not packaging."
     else
         let v = version.Value
-
-        let getTargetDetails proj = 
-            let projFile = (fileInfo proj)
-            let fileName = projFile.Name
-            let projName = 
-                fileName.Substring(0, fileName.Length - projFile.Extension.Length)
-            let outProjDir = outDir + projName + @"/" + v + @"/"
-            (projName, outProjDir)
 
         let setParams (projName, outProjDir) x = 
             {x with 
@@ -115,7 +115,7 @@ Target "Package" (fun _ ->
         |> List.iter (fun pattern ->
             !!pattern
             |> Seq.iter (fun proj ->
-                let targetDetails = getTargetDetails proj
+                let targetDetails = getTargetDetails proj v
                 
                 proj
                 |> build (setParams targetDetails)
@@ -128,7 +128,22 @@ Target "Package" (fun _ ->
 
 Target "Publish" (fun _ ->
     if(version.IsSome) then 
-        ()
+        settings.WebsitePackages.projFiles
+        |> List.iter (fun pattern ->
+            !!pattern
+            |> Seq.iter (fun proj ->
+                let (projName, outProjDir) = getTargetDetails proj version.Value
+
+                if settings.PublishSettings.WebsitesRoot.IsNone then
+                    failwithf "Attempting to publish website msdeploy package, but settings.PublishSettings.WebsitesRoot is not set. Please use websitePublishRoot in config.fsx."
+                
+                let targetDir = settings.PublishSettings.WebsitesRoot.Value + projName + @"/" 
+                ensureDirectory targetDir
+                //outProjDir = outDir + projName + @"/" + v + @"/"
+                !! (outProjDir + "**/*.*")
+                |> Zip outProjDir (targetDir + version.Value + ".zip") 
+            )
+        )
     else
         ()
 )
