@@ -3,6 +3,7 @@
 #load "config.fsx"
 
 open Fake
+open System
 let buildMode = getBuildParamOrDefault "buildMode" "Release"
 let root = FileSystemHelper.currentDirectory +  @"/"
 let outDir = root + "out/"
@@ -46,7 +47,7 @@ Target "Build" (fun _ ->
 )
 
 Target "NUnit" (fun _ ->
-    let testOutDir = outDir + @"/TestResults"
+    let testOutDir = outDir + @"TestResults"
     FileSystemHelper.ensureDirectory testOutDir
 
     settings.TestSettings.nunitTests
@@ -68,7 +69,36 @@ Target "NUnit" (fun _ ->
 Target "Package" (fun _ ->
     trace "foo"
 
-    //if(false) then do printfn "%s" FooSettings 
+    let setParams proj x = 
+        let projFile = (fileInfo proj)
+        let fileName = projFile.Name
+        let projName = 
+            fileName.Substring(0, fileName.Length - projFile.Extension.Length)
+        let outProjDir = outDir + projName + @"/"
+        {x with 
+            Verbosity = Some(Quiet);
+            Targets = ["Package"];
+            Properties = 
+                [
+                    "Configuration", buildMode
+                    "DebugSymbols", "True"
+                    "Optimize", buildSettings.optimize.ToString()
+                    "PackageLocation", outProjDir + projName + ".zip"
+                    "DeployIisAppPath", projName
+                    "DesktopBuildPackageLocation", projName
+                ]
+        }
+
+    
+    settings.WebsitePackages.projFiles
+    |> List.iter (fun pattern ->
+        !!pattern
+        |> Seq.iter (fun proj ->
+            proj
+            |> build (setParams proj)
+            |> ignore 
+        )
+    )
 )
 
 "Clean"

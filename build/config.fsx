@@ -9,5 +9,8 @@ let settings =
     |> nunit (fun p ->
         {p with nunitTests = [@"**\bin\@buildMode@\*Tests.dll"]}
     )
+    |> websites (fun p ->
+        {p with projFiles = [@"**\MyWebAppForDeployment.csproj"]}
+    )
 
 
