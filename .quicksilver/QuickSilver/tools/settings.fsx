@@ -19,12 +19,23 @@ module Settings =
         }
 
     let defaultWebsitePackages = {WebsitePackageRecord.projFiles = []}
+
+    type PackageConventionType = 
+        | GitTag
+
+    type PackageConventionRecord = 
+        {
+            Type : PackageConventionType
+        }
+
+    let defaultPackageConventionRecord = {PackageConventionRecord.Type = GitTag}
     
     type SettingsRecord = 
         { 
             BuildSettings : BuildSettingsRecord
             TestSettings : TestSettingsRecord 
             WebsitePackages : WebsitePackageRecord
+            PackageConvention : PackageConventionRecord
         }
         member this.Build f = 
             {this with BuildSettings = f(this.BuildSettings)}
@@ -39,6 +50,7 @@ module Settings =
             BuildSettings = defaultBuildSettings
             TestSettings = defaultTestSettings
             WebsitePackages = defaultWebsitePackages
+            PackageConvention = defaultPackageConventionRecord
         }
 
     let build f (settings:SettingsRecord) = settings.Build(f)

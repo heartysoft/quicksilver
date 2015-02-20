@@ -1,5 +1,5 @@
 
 @echo off
 cls
-".nuget\NuGet.exe" "Install" "FAKE" "-OutputDirectory" "packages" "-ExcludeVersion"
-"packages\FAKE\tools\Fake.exe" ".\build\build.fsx" %*
+".nuget\NuGet.exe" "Install" "FAKE" "-OutputDirectory" ".quicksilver" "-ExcludeVersion"
+".quicksilver\FAKE\tools\Fake.exe" ".\.quicksilver\quicksilver\tools\build.fsx" %*

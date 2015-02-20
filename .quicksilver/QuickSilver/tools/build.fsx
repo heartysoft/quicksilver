@@ -1,11 +1,14 @@
  // include Fake lib
-#r @"../packages/FAKE/tools/FakeLib.dll"
-#load "config.fsx"
+#r @"../../FAKE/tools/FakeLib.dll"
+#load @"../../../build/config.fsx"
 
 open Fake
+open Fake.Git
 open System
-let buildMode = getBuildParamOrDefault "buildMode" "Release"
+
 let root = FileSystemHelper.currentDirectory +  @"/"
+let buildMode = getBuildParamOrDefault "buildMode" "Release"
+
 let outDir = root + "out/"
 
 let settings = Config.settings
@@ -67,38 +70,43 @@ Target "NUnit" (fun _ ->
 )
 
 Target "Package" (fun _ ->
-    trace "foo"
+    let version = describe root
+    trace version
+//    let version = 
+//        match settings.PackageConvention.Type with
+//        | QuickSilver.Settings.PackageConventionType.GitTag ->
+            
 
-    let setParams proj x = 
-        let projFile = (fileInfo proj)
-        let fileName = projFile.Name
-        let projName = 
-            fileName.Substring(0, fileName.Length - projFile.Extension.Length)
-        let outProjDir = outDir + projName + @"/"
-        {x with 
-            Verbosity = Some(Quiet);
-            Targets = ["Package"];
-            Properties = 
-                [
-                    "Configuration", buildMode
-                    "DebugSymbols", "True"
-                    "Optimize", buildSettings.optimize.ToString()
-                    "PackageLocation", outProjDir + projName + ".zip"
-                    "DeployIisAppPath", projName
-                    "DesktopBuildPackageLocation", projName
-                ]
-        }
-
-    
-    settings.WebsitePackages.projFiles
-    |> List.iter (fun pattern ->
-        !!pattern
-        |> Seq.iter (fun proj ->
-            proj
-            |> build (setParams proj)
-            |> ignore 
-        )
-    )
+//    let setParams proj x = 
+//        let projFile = (fileInfo proj)
+//        let fileName = projFile.Name
+//        let projName = 
+//            fileName.Substring(0, fileName.Length - projFile.Extension.Length)
+//        let outProjDir = outDir + projName + @"/"
+//        {x with 
+//            Verbosity = Some(Quiet);
+//            Targets = ["Package"];
+//            Properties = 
+//                [
+//                    "Configuration", buildMode
+//                    "DebugSymbols", "True"
+//                    "Optimize", buildSettings.optimize.ToString()
+//                    "PackageLocation", outProjDir + projName + ".zip"
+//                    "DeployIisAppPath", projName
+//                    "DesktopBuildPackageLocation", projName
+//                ]
+//        }
+//
+//    
+//    settings.WebsitePackages.projFiles
+//    |> List.iter (fun pattern ->
+//        !!pattern
+//        |> Seq.iter (fun proj ->
+//            proj
+//            |> build (setParams proj)
+//            |> ignore 
+//        )
+//    )
 )
 
 "Clean"

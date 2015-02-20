@@ -1,4 +1,4 @@
-#load "settings.fsx"
+#load "../.quicksilver/QuickSilver/tools/settings.fsx"
 open QuickSilver
 
 let settings = 
