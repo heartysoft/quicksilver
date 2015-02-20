@@ -70,7 +70,7 @@ Target "NUnit" (fun _ ->
 )
 
 Target "Package" (fun _ ->
-    let version = describe root
+    let version = runSimpleGitCommand root "describe --abbrev=0 --tags --exact-match"
     trace version
 //    let version = 
 //        match settings.PackageConvention.Type with
@@ -112,7 +112,7 @@ Target "Package" (fun _ ->
 "Clean"
     ==> "Build"
     ==> "NUnit"
-    ==> "Package"
+//    ==> "Package"
 
 // start build
 RunTargetOrDefault "NUnit"
