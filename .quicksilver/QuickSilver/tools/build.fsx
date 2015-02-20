@@ -70,8 +70,16 @@ Target "NUnit" (fun _ ->
 )
 
 Target "Package" (fun _ ->
-    let version = runSimpleGitCommand root "describe --abbrev=0 --tags --exact-match"
-    trace version
+    //only GitTag for now.
+    let version = 
+        try
+            Some(runSimpleGitCommand root "describe --abbrev=0 --tags --exact-match")
+        with
+            | _ -> None
+    
+    match version with
+    | Some(v) -> trace v
+    | _ -> trace "Current commit is not tagged. Will not package."
 //    let version = 
 //        match settings.PackageConvention.Type with
 //        | QuickSilver.Settings.PackageConventionType.GitTag ->
