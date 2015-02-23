@@ -22,6 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{41173EAE
 		.quicksilver\QuickSilver\tools\settings.fsx = .quicksilver\QuickSilver\tools\settings.fsx
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyWindowsService", "MyWindowsService\MyWindowsService.csproj", "{DEEEF202-0E34-4D6A-93CF-88F9584D1575}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{E3CF69C3-7E88-4E50-8A25-A0FD709E0D36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3CF69C3-7E88-4E50-8A25-A0FD709E0D36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3CF69C3-7E88-4E50-8A25-A0FD709E0D36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEEEF202-0E34-4D6A-93CF-88F9584D1575}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEEEF202-0E34-4D6A-93CF-88F9584D1575}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEEEF202-0E34-4D6A-93CF-88F9584D1575}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEEEF202-0E34-4D6A-93CF-88F9584D1575}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
