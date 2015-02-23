@@ -8,6 +8,7 @@ open System
 
 let root = FileSystemHelper.currentDirectory +  @"/"
 let buildMode = getBuildParamOrDefault "buildMode" "Release"
+let qsDir = root + @".quicksilver/quicksilver/tools/"
 
 let outDir = root + "out/"
 
@@ -101,7 +102,6 @@ Target "Package" (fun _ ->
                         "Optimize", buildSettings.optimize.ToString()
                         "PackageLocation", outProjDir + projName + ".zip"
                         "DeployIisAppPath", projName
-                        "DesktopBuildPackageLocation", projName
                     ]
             }
 
@@ -110,6 +110,7 @@ Target "Package" (fun _ ->
             trace target
             if(FileSystemHelper.directoryExists(target)) then
                 CopyDir(outProjDir) target (fun _->true)
+                FileUtils.cp (qsDir + "install_website.bat") (outProjDir + "install.bat")
     
         settings.WebsitePackages.projFiles
         |> List.iter (fun pattern ->
