@@ -16,6 +16,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecondTests", "SecondTests\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{41173EAE-2532-486E-9B21-00B317A7E78C}"
 	ProjectSection(SolutionItems) = preProject
+		build.bat = build.bat
 		.quicksilver\QuickSilver\tools\build.fsx = .quicksilver\QuickSilver\tools\build.fsx
 		build\config.fsx = build\config.fsx
 		.quicksilver\QuickSilver\tools\install_website.bat = .quicksilver\QuickSilver\tools\install_website.bat

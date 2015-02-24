@@ -110,7 +110,7 @@ Target "Package" (fun _ ->
             trace target
             if(FileSystemHelper.directoryExists(target)) then
                 CopyDir(outProjDir) target (fun _->true)
-                FileUtils.cp (qsDir + "install_website.bat") (outProjDir + "install.bat")
+                FileUtils.cp (qsDir + "websites\boot\install_website.bat") (outProjDir + "install.bat")
     
         settings.WebsitePackages.projFiles
         |> List.iter (fun pattern ->
@@ -125,6 +125,35 @@ Target "Package" (fun _ ->
                 copyMSDeployEnvs targetDetails
             )
         )
+
+        settings.TopShelfServicePackages
+        |> List.iter (fun tss ->
+            let pattern =  tss.binaryPath.Replace("@buildMode@", buildMode)
+            let binaryPath = !!pattern |> Seq.head
+            let outProjDir = outDir + tss.name + @"/" + version.Value + @"/"
+            CopyDir (outProjDir + @"binaries/") (binaryPath + @"\") (fun _ -> true)
+            CopyDir (outProjDir + @"tools/config-transform") (root + @".quicksilver/config-transform/tools/") (fun _ -> true)
+            CopyDir (outProjDir + @"scripts/") (root + @".quicksilver/quicksilver/tools/topshelf/scripts/") (fun _ -> true)
+            FileUtils.cp (qsDir + "topshelf/boot/install_topshelf.bat") (outProjDir + "install.bat")
+            
+            let envDirForProject = (root + @"/env/" + tss.name + @"/")
+
+            if (directoryExists envDirForProject) then 
+                CopyDir (outProjDir + @"env/") envDirForProject (fun _ -> true)
+            else
+                failwith "Top shelf services must have servicekey.deploy.envname.pson in env directory. Please look at sample templates in .\quicksilver\quicksilver\tools\topshelf\templates\ for formats."
+
+
+            let serviceInfo = 
+                "@{" + Environment.NewLine +
+                    "    serviceKey='" + tss.name + "';" + Environment.NewLine +
+                    "    version='" + v + "';" + Environment.NewLine +
+                    "    packageUtcTime='" + DateTime.UtcNow.ToString() + "'" + Environment.NewLine +
+                    "}" + Environment.NewLine
+
+            WriteStringToFile false (outProjDir + "serviceInfo.pson") serviceInfo
+          )
+        
 )
 
 Target "Publish" (fun _ ->
@@ -135,10 +164,7 @@ Target "Publish" (fun _ ->
             |> Seq.iter (fun proj ->
                 let (projName, outProjDir) = getTargetDetails proj version.Value
 
-                if settings.PublishSettings.WebsitesRoot.IsNone then
-                    failwithf "Attempting to publish website msdeploy package, but settings.PublishSettings.WebsitesRoot is not set. Please use websitePublishRoot in config.fsx."
-                
-                let targetDir = settings.PublishSettings.WebsitesRoot.Value + projName + @"/" 
+                let targetDir = settings.PublishSettings.WebsitesRoot + projName + @"/" 
                 ensureDirectory targetDir
                 //outProjDir = outDir + projName + @"/" + v + @"/"
                 !! (outProjDir + "**/*.*")

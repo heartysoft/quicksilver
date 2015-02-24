@@ -20,6 +20,14 @@ module Settings =
 
     let defaultWebsitePackages = {WebsitePackageRecord.projFiles = []}
 
+    type TopShelfServicePackageRecord = 
+        {
+            name: string
+            binaryPath : string
+        }
+
+    let defaultTopShelfServicePackage = {TopShelfServicePackageRecord.name = ""; binaryPath = ""}
+
     type PackageConventionType = 
         | GitTag
 
@@ -32,18 +40,21 @@ module Settings =
 
     type PublishSettingsRecord = 
         {
-            WebsitesRoot : string option
+            WebsitesRoot : string
+            TopShelfServicesRoot : string
         }
     let defaultPublishSettingsRecord = 
         {
-            WebsitesRoot = None
+            WebsitesRoot = "deploy/"
+            TopShelfServicesRoot = "deploy/"
         }
-    
+
     type SettingsRecord = 
         { 
             BuildSettings : BuildSettingsRecord
             TestSettings : TestSettingsRecord 
             WebsitePackages : WebsitePackageRecord
+            TopShelfServicePackages : TopShelfServicePackageRecord list
             PackageConvention : PackageConventionRecord
             PublishSettings : PublishSettingsRecord
         }
@@ -54,13 +65,18 @@ module Settings =
             {this with TestSettings = f(this.TestSettings)}
         member this.Websites f = 
             {this with WebsitePackages = f(this.WebsitePackages)}
+        member this.TopShelfServices f = 
+            {this with TopShelfServicePackages = f(defaultTopShelfServicePackage)}
         member this.WebsitesPublishRoot path = 
-            {this with PublishSettings = {this.PublishSettings with WebsitesRoot = Some(path)}}
+            {this with PublishSettings = {this.PublishSettings with WebsitesRoot = path}}
+        member this.TopShelfServicesPublishRoot path = 
+            {this with PublishSettings = {this.PublishSettings with TopShelfServicesRoot = path}}
 
     let settings = {
             BuildSettings = defaultBuildSettings
             TestSettings = defaultTestSettings
             WebsitePackages = defaultWebsitePackages
+            TopShelfServicePackages = []
             PackageConvention = defaultPackageConventionRecord
             PublishSettings = defaultPublishSettingsRecord
         }
@@ -68,4 +84,6 @@ module Settings =
     let build f (settings:SettingsRecord) = settings.Build(f)
     let nunit f (settings:SettingsRecord) = settings.NUnit(f)
     let websites f (settings:SettingsRecord) = settings.Websites f
+    let topShelfServices f (settings:SettingsRecord) = settings.TopShelfServices f
     let websitesPublishRoot path (settings:SettingsRecord) = settings.WebsitesPublishRoot path
+    let topShelfServicesPublishRoot path (settings:SettingsRecord) = settings.TopShelfServicesPublishRoot path

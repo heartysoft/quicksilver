@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -78,7 +79,8 @@ namespace MyWindowsService
             {
                 "Hello",
                 "World",
-                DateTime.Now.ToString(CultureInfo.InvariantCulture)
+                DateTime.Now.ToString(CultureInfo.InvariantCulture),
+                ConfigurationManager.AppSettings["MySetting"]
             }.ToList();
         } 
     }

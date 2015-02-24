@@ -1,0 +1,14 @@
+@{
+    RunAsSystem=$false
+    RunAsLocalService=$false
+    RunAsNetworkService=$false
+    User="userAccountForService"
+    Password="Password For User Account"
+    Interactive=$false
+    InstallationLocationRoot="D:\Parent Folder for deployed artifacts"
+    ServiceName="MyWindowsService"
+    DisplayName="MyWindowsService"
+    ServiceDescription="This is my windows service"
+    Reinstall=$true
+    Executable="MyWindowsService.exe"
+}

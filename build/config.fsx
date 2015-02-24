@@ -12,6 +12,15 @@ let settings =
     |> websites (fun p ->
         {p with projFiles = [@"**\MyWebAppForDeployment.csproj"]}
     )
-    |> websitesPublishRoot @"D:/woohoo/"
+    |> topShelfServices (fun (p) ->
+        [
+            {
+                p with 
+                    name="MyWindowsService" 
+                    binaryPath= @"**\MyWindowsService\bin\@buildMode@\"
+            }
+        ]
+    )
+    //|> websitesPublishRoot @"D:/woohoo/"
 
 
