@@ -17,6 +17,8 @@ deploy/
 /specs/
 /out/
 
+/nuget/*.nupkg
+
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packages/*/build/
 

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>quicksilver</id>
+    <version>0.0.1-alpha</version>
+    <authors>ashic</authors>
+    <owners>ashic</owners>
+    <licenseUrl>https://raw.githubusercontent.com/heartysoft/quicksilver/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/heartysoft/quicksilver</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Build, test, package, tokenize, deploy websites and windows services.</description>
+    <copyright>Copyright 2015</copyright>
+    <tags>ci msdeploy</tags>
+  </metadata>
+  <files>
+    <file src="..\.quicksilver\QuickSilver\**\*.*" target=".\" />
+  </files>
+</package>
