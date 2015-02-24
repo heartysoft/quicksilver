@@ -1,0 +1,14 @@
+@{
+    RunAsSystem=$true
+    RunAsLocalService=$false
+    RunAsNetworkService=$false
+    User=""
+    Password=""
+    Interactive=$false
+    InstallationLocationRoot="D:\Woohoo\deployed\"
+    ServiceName="MyWindowsService"
+    DisplayName="MyWindowsService"
+    ServiceDescription="This is my windows service"
+    Reinstall=$true
+    Executable="MyWindowsService.exe"
+}

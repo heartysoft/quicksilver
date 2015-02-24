@@ -51,7 +51,7 @@ write-host "Loading service configuration from $configFile..."
 
 $config = gc "$configFile" | Out-String | iex
 
-$runAsSystem = $config["RunAsSysten"]
+$runAsSystem = $config["RunAsSystem"]
 $runAsLocalService = $config["RunAsLocalService"]
 $runAsNetworkService = $config["RunAsNetworkService"]
 $user = $config["User"]

@@ -15,7 +15,7 @@ namespace MyWindowsService
 {
     class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
 
             // Start OWIN host 
@@ -25,14 +25,12 @@ namespace MyWindowsService
             {
                 x.Service<MyWebServer>(s =>
                 {
-                    s.ConstructUsing(_=> new MyWebServer(root));
+                    s.ConstructUsing(_ => new MyWebServer(root));
                     s.WhenStarted(_ => _.Start());
                     s.WhenStopped(_ => _.Stop());
                 });
             });
 
-
-            Console.ReadLine();
         }
     }
 

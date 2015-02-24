@@ -19,11 +19,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{41173EAE
 		build.bat = build.bat
 		.quicksilver\QuickSilver\tools\build.fsx = .quicksilver\QuickSilver\tools\build.fsx
 		build\config.fsx = build\config.fsx
-		.quicksilver\QuickSilver\tools\install_website.bat = .quicksilver\QuickSilver\tools\install_website.bat
 		.quicksilver\QuickSilver\tools\settings.fsx = .quicksilver\QuickSilver\tools\settings.fsx
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyWindowsService", "MyWindowsService\MyWindowsService.csproj", "{DEEEF202-0E34-4D6A-93CF-88F9584D1575}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "website", "website", "{BE188ADB-1602-406A-BEFC-21328E58480A}"
+	ProjectSection(SolutionItems) = preProject
+		.quicksilver\QuickSilver\tools\website\boot\install_website.bat = .quicksilver\QuickSilver\tools\website\boot\install_website.bat
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,5 +54,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BE188ADB-1602-406A-BEFC-21328E58480A} = {41173EAE-2532-486E-9B21-00B317A7E78C}
 	EndGlobalSection
 EndGlobal

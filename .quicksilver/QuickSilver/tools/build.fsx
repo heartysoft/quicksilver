@@ -110,7 +110,7 @@ Target "Package" (fun _ ->
             trace target
             if(FileSystemHelper.directoryExists(target)) then
                 CopyDir(outProjDir) target (fun _->true)
-                FileUtils.cp (qsDir + "websites\boot\install_website.bat") (outProjDir + "install.bat")
+                FileUtils.cp (qsDir + "website/boot/install_website.bat") (outProjDir + "install.bat")
     
         settings.WebsitePackages.projFiles
         |> List.iter (fun pattern ->
@@ -131,7 +131,7 @@ Target "Package" (fun _ ->
             let pattern =  tss.binaryPath.Replace("@buildMode@", buildMode)
             let binaryPath = !!pattern |> Seq.head
             let outProjDir = outDir + tss.name + @"/" + version.Value + @"/"
-            CopyDir (outProjDir + @"binaries/") (binaryPath + @"\") (fun _ -> true)
+            CopyDir (outProjDir + @"binaries/") (binaryPath + @"/") (fun _ -> true)
             CopyDir (outProjDir + @"tools/config-transform") (root + @".quicksilver/config-transform/tools/") (fun _ -> true)
             CopyDir (outProjDir + @"scripts/") (root + @".quicksilver/quicksilver/tools/topshelf/scripts/") (fun _ -> true)
             FileUtils.cp (qsDir + "topshelf/boot/install_topshelf.bat") (outProjDir + "install.bat")
@@ -167,10 +167,28 @@ Target "Publish" (fun _ ->
                 let targetDir = settings.PublishSettings.WebsitesRoot + projName + @"/" 
                 ensureDirectory targetDir
                 //outProjDir = outDir + projName + @"/" + v + @"/"
+
+                trace outProjDir
+                trace targetDir
                 !! (outProjDir + "**/*.*")
                 |> Zip outProjDir (targetDir + version.Value + ".zip") 
             )
         )
+
+        settings.TopShelfServicePackages
+        |> List.iter (fun tss ->
+            let source = outDir + tss.name + @"/" + version.Value + @"/"
+            let targetDir = settings.PublishSettings.TopShelfServicesRoot + tss.name + @"/"
+            trace source
+            trace targetDir
+            
+            ensureDirectory targetDir
+
+            !!(source + "**/*.*")
+            |> Zip source (targetDir + version.Value + ".zip")
+        )
+
+
     else
         ()
 )
