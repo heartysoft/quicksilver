@@ -103,8 +103,9 @@ if($existing){
     if($reinstall){
         write-host "Reinstall requested. Removing service $serviceName..."
         exec {
-            sc.exe delete """$serviceName"""
+            sc.exe delete `"$serviceName`" | echo
         }
+
         write-host "service $servicename uninstalled..."
     }
 }
@@ -149,10 +150,12 @@ echo "Target executable: $exePath"
 if(-not($existing) -or $reinstall){
     write-host "Installing service $serviceName using $exePath"
     
-    $installCommand = "$exePath install $identity -servicename:$serviceName -description `"$serviceDescription`" -displayname:`"$displayName`""
-    write-host $installCommand
+    $installArgs = "install $identity -servicename:$serviceName -description `"$serviceDescription`" -displayname `"$displayName`""
+    #$wrappedInstallCommand = "$installCommand'"
+    #write-host $wrappedInstallCommand
+    
     exec {
-        iex $installCommand
+        cmd /C "$exePath $installArgs" | echo
     }
 
     write-host "Service installed"
