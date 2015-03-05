@@ -110,8 +110,10 @@ Target "Package" (fun _ ->
             trace target
             if(FileSystemHelper.directoryExists(target)) then
                 CopyDir(outProjDir) target (fun _->true)
-                FileUtils.cp (qsDir + "website/boot/install_website.bat") (outProjDir + "install.bat")
-    
+                
+        let copyInstallerScript (projName, outProjDir) = 
+            FileUtils.cp (qsDir + "website/boot/install_website.bat") (outProjDir + "install.bat")
+
         settings.WebsitePackages.projFiles
         |> List.iter (fun pattern ->
             !!pattern
@@ -123,6 +125,7 @@ Target "Package" (fun _ ->
                 |> ignore 
 
                 copyMSDeployEnvs targetDetails
+                copyInstallerScript targetDetails
             )
         )
 
