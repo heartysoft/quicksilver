@@ -48,6 +48,7 @@ Target "Build" (fun _ ->
                 { p with
                     Retries = 3
                     Sources = buildSettings.additionalPackageSources @ p.Sources
+                    OutputPath = System.IO.Path.Combine(directory sln, "packages")
                 }
             )
         else
