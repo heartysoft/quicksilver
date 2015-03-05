@@ -4,7 +4,7 @@ open QuickSilver
 let settings = 
     settings 
     |> build (fun p -> 
-        {p with solutions = ["MyWebAppForDeployment.sln"]}
+        {p with solutions = ["MyWebAppForDeployment.sln"]; restorePackagesPriorToBuild = true}
     )
     |> nunit (fun p ->
         {p with nunitTests = [@"**\bin\@buildMode@\*Tests.dll"]}

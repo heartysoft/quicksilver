@@ -39,11 +39,26 @@ Target "Build" (fun _ ->
                     "Optimize", buildSettings.optimize.ToString()
                 ]
         }
+
+    let restoreNuget sln = 
+        if buildSettings.restorePackagesPriorToBuild then
+            trace <| "restoring packages prior to build..."
+            sln
+            |> RestoreMSSolutionPackages(fun p ->
+                { p with
+                    Retries = 3
+                    Sources = buildSettings.additionalPackageSources @ p.Sources
+                }
+            )
+        else
+            trace <| "pre-build package restore not requested. skipping..."
+        sln
     
     solutions
     |> List.iter (fun sln ->
         trace <| sprintf "Building %s..." sln   
         sln
+        |> restoreNuget
         |> build setParams
         |> ignore
     )
@@ -90,6 +105,7 @@ Target "Package" (fun _ ->
         trace "Commit not tagged with v* tag. Not packaging."
     else
         let v = version.Value
+        trace <| sprintf "Commit not tagged with v* tag %A. packaging." v
 
         let setParams (projName, outProjDir) x = 
             {x with 
@@ -107,11 +123,12 @@ Target "Package" (fun _ ->
 
         let copyMSDeployEnvs (projName, outProjDir) = 
             let target = root + @"env/" + projName
-            trace target
+            trace <| sprintf "copying tokenization files from %s" target
             if(FileSystemHelper.directoryExists(target)) then
                 CopyDir(outProjDir) target (fun _->true)
                 
         let copyInstallerScript (projName, outProjDir) = 
+            trace <| sprintf "copying installer script" 
             FileUtils.cp (qsDir + "website/boot/install_website.bat") (outProjDir + "install.bat")
 
         settings.WebsitePackages.projFiles

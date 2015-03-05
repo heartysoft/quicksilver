@@ -2,9 +2,9 @@ namespace QuickSilver
 [<AutoOpen>]
 module Settings = 
     type BuildSettingsRecord = 
-        { solutions:string list; optimize:bool }
+        { solutions:string list; optimize:bool; additionalPackageSources : string list; restorePackagesPriorToBuild : bool }
 
-    let defaultBuildSettings = {solutions = []; optimize=true}
+    let defaultBuildSettings = {solutions = []; optimize=true; additionalPackageSources = []; restorePackagesPriorToBuild = false }
 
     type TestSettingsRecord = 
         {
