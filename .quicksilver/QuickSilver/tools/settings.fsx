@@ -40,13 +40,30 @@ module Settings =
 
     type PublishSettingsRecord = 
         {
-            WebsitesRoot : string
-            TopShelfServicesRoot : string
+            WebsitesDevRoot : string
+            WebsitesCIRoot : string
+            TopShelfServicesDevRoot : string
+            TopShelfServicesCIRoot : string
         }
+
+        member this.GetWebPublishRoot (builder:string) = 
+            match builder with
+            | "dev" -> this.WebsitesDevRoot
+            | "ci" -> this.WebsitesCIRoot
+            | _ -> failwith <| sprintf "Builder %s not supported. Please specify ci, or leave empty for dev." builder
+        
+        member this.GetTopShelfServicesPublishRoot (builder:string) = 
+            match builder with
+            | "dev" -> this.TopShelfServicesDevRoot
+            | "ci" -> this.TopShelfServicesCIRoot
+            | _ -> failwith <| sprintf "Builder %s not supported. Please specify ci, or leave empty for dev." builder
+
     let defaultPublishSettingsRecord = 
         {
-            WebsitesRoot = "deploy/"
-            TopShelfServicesRoot = "deploy/"
+            WebsitesDevRoot = "deploy/"
+            WebsitesCIRoot = "deploy/"
+            TopShelfServicesDevRoot = "deploy/"
+            TopShelfServicesCIRoot = "deploy/"
         }
 
     type SettingsRecord = 
@@ -67,10 +84,14 @@ module Settings =
             {this with WebsitePackages = f(this.WebsitePackages)}
         member this.TopShelfServices f = 
             {this with TopShelfServicePackages = f(defaultTopShelfServicePackage)}
-        member this.WebsitesPublishRoot path = 
-            {this with PublishSettings = {this.PublishSettings with WebsitesRoot = path}}
-        member this.TopShelfServicesPublishRoot path = 
-            {this with PublishSettings = {this.PublishSettings with TopShelfServicesRoot = path}}
+        member this.WebsitesDevPublishRoot path = 
+            {this with PublishSettings = {this.PublishSettings with WebsitesDevRoot = path}}
+        member this.WebsitesCIPublishRoot path = 
+            {this with PublishSettings = {this.PublishSettings with WebsitesCIRoot = path}}
+        member this.TopShelfServicesDevPublishRoot path = 
+            {this with PublishSettings = {this.PublishSettings with TopShelfServicesDevRoot = path}}
+        member this.TopShelfServicesCIPublishRoot path = 
+            {this with PublishSettings = {this.PublishSettings with TopShelfServicesCIRoot = path}}
 
     let settings = {
             BuildSettings = defaultBuildSettings
@@ -85,5 +106,7 @@ module Settings =
     let nunit f (settings:SettingsRecord) = settings.NUnit(f)
     let websites f (settings:SettingsRecord) = settings.Websites f
     let topShelfServices f (settings:SettingsRecord) = settings.TopShelfServices f
-    let websitesPublishRoot path (settings:SettingsRecord) = settings.WebsitesPublishRoot path
-    let topShelfServicesPublishRoot path (settings:SettingsRecord) = settings.TopShelfServicesPublishRoot path
+    let websitesDevPublishRoot path (settings:SettingsRecord) = settings.WebsitesDevPublishRoot path
+    let websitesCIPublishRoot path (settings:SettingsRecord) = settings.WebsitesCIPublishRoot path
+    let topShelfServicesDevPublishRoot path (settings:SettingsRecord) = settings.TopShelfServicesDevPublishRoot path
+    let topShelfServicesCIPublishRoot path (settings:SettingsRecord) = settings.TopShelfServicesCIPublishRoot path

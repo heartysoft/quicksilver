@@ -6,6 +6,9 @@ open Fake
 open Fake.Git
 open System
 
+let builder = (getBuildParamOrDefault "builder" "dev").ToLower()
+trace <| sprintf "build environment is %s" builder
+
 let root = FileSystemHelper.currentDirectory +  @"/"
 let buildMode = getBuildParamOrDefault "buildMode" "Release"
 let qsDir = root + @".quicksilver/quicksilver/tools/"
@@ -106,7 +109,7 @@ Target "Package" (fun _ ->
         trace "Commit not tagged with v* tag. Not packaging."
     else
         let v = version.Value
-        trace <| sprintf "Commit not tagged with v* tag %A. packaging." v
+        trace <| sprintf "Commit tagged with v* tag %A. packaging." v
 
         let setParams (projName, outProjDir) x = 
             {x with 
@@ -185,12 +188,12 @@ Target "Publish" (fun _ ->
             |> Seq.iter (fun proj ->
                 let (projName, outProjDir) = getTargetDetails proj version.Value
 
-                let targetDir = settings.PublishSettings.WebsitesRoot + projName + @"/" 
+                let targetDir = settings.PublishSettings.GetWebPublishRoot(builder) + projName + @"/" 
+            
+                trace <| sprintf "Publishing website msdeploy package from %A  to %A" outProjDir targetDir
+                
                 ensureDirectory targetDir
-                //outProjDir = outDir + projName + @"/" + v + @"/"
 
-                trace outProjDir
-                trace targetDir
                 !! (outProjDir + "**/*.*")
                 |> Zip outProjDir (targetDir + version.Value + ".zip") 
             )
@@ -199,9 +202,9 @@ Target "Publish" (fun _ ->
         settings.TopShelfServicePackages
         |> List.iter (fun tss ->
             let source = outDir + tss.name + @"/" + version.Value + @"/"
-            let targetDir = settings.PublishSettings.TopShelfServicesRoot + tss.name + @"/"
-            trace source
-            trace targetDir
+            let targetDir = settings.PublishSettings.GetTopShelfServicesPublishRoot(builder) + tss.name + @"/"
+            
+            trace <| sprintf "Publishing top shelf service from %A  to %A" source targetDir
             
             ensureDirectory targetDir
 

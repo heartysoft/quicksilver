@@ -21,6 +21,7 @@ let settings =
             }
         ]
     )
-    //|> websitesPublishRoot @"D:/woohoo/"
+    |> websitesCIPublishRoot @"D:/woohoo/"
+    |> topShelfServicesCIPublishRoot @"D:/woohoo/"
 
 
