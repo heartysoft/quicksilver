@@ -16,3 +16,11 @@ Quick build + deploy platform for .NET. Currently supports msdeploy for websites
 * NuGet packaging.
 * Versioning of AssemblyInfo, etc.
 * Additional test frameworks, etc.
+
+## Usage
+
+Please check the wiki.
+
+## Examples
+
+Will add here later. (Check wiki for now).
