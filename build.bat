@@ -1,6 +1,16 @@
-
 @echo off
+SETLOCAL
+::set to packages dir. Must NOT contain trailing \
+SET _packages=".\packages"
+
 cls
-".nuget\NuGet.exe" "Install" "FAKE" "-OutputDirectory" ".quicksilver" "-ExcludeVersion"
-".nuget\NuGet.exe" "Install" "config-transform" -pre "-OutputDirectory" ".quicksilver" "-ExcludeVersion"
-".quicksilver\FAKE\tools\Fake.exe" ".\.quicksilver\quicksilver\tools\build.fsx" %*
+
+if not exist "%_packages%\fake" (
+".nuget\NuGet.exe" "Install" "FAKE" "-OutputDirectory" "%_packages%" "-ExcludeVersion"
+)
+
+if not exist "%_packages%\config-transform" (
+".nuget\NuGet.exe" "Install" "config-transform" -pre "-OutputDirectory" "%_packages%" "-ExcludeVersion"
+)
+
+"%_packages%\FAKE\tools\Fake.exe" build.fsx %*
