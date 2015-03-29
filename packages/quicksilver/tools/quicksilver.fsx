@@ -17,7 +17,7 @@ let mutable publishRoot = rootDir + "deploy" + sep
 let mutable ciPublishRoot = rootDir + "deploy" + sep
 
 
-let getGitVersion() = 
+let private getGitVersion() = 
     try
         Some(runSimpleGitCommand rootDir "describe --abbrev=0 --tags --exact-match --match v*")
     with
@@ -30,9 +30,10 @@ let mutable version =
         getGitVersion()
     else
         Some(buildVersion)
-
-let sayHello = 
-    trace
+        
+let restoreNugetPackagesTo pkgDir = 
+    !! "./**/packages.config"
+    |> Seq.iter (RestorePackage (fun p -> {p with OutputPath=pkgDir})) 
 
 let buildSolutions slns = 
     let setParams x = 
@@ -193,3 +194,4 @@ let packageQuicksilverTopshelfServices (services:QuicksilverTopshelfService list
             !!(source + "**/*.*")
             |> Zip source (targetDir + version.Value + ".zip")
       )
+

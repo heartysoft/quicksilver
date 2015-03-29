@@ -15,7 +15,7 @@ ciPublishRoot <- @"D:\Derp\"
 //version <- Some("1.5")
 
 //Needed if auto package restore doesn't work. Sometimes the case with BCL builds, etc.
-RestorePackages()
+restoreNugetPackagesTo "./packages"
 
 Target "Default" (fun x ->
     //also, CleanDirs [...]
