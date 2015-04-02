@@ -13,6 +13,6 @@
     <tags>ci msdeploy</tags>
   </metadata>
   <files>
-    <file src="..\packages\quickSilver\**\*.*" target=".\" />
+    <file src="..\packages\quickSilver\tools\**\*.*" target=".\" />
   </files>
 </package>
