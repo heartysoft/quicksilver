@@ -25,11 +25,18 @@ let private getGitVersion() =
         | _ -> None
 
 
+let private getNugetVersion (version:string) = 
+    if(version.StartsWith("v")) then
+        version.Substring(1)
+    else
+        failwith "version must be in the form of v0.0.1 or v0.0.1-alpha. This follows NuGet versioning prefixed with v."
+
 let mutable version = 
     let buildVersion = getBuildParam "version"
     if buildVersion = "" then
         getGitVersion()
     else
+        //maybe check that it's a vn.m.o[-foo] tag.
         Some(buildVersion)
         
 let restoreNugetPackagesTo pkgDir = 
@@ -138,7 +145,7 @@ let packageQuicksilverWebsites (csprojGlobs:string list) =
                 proj
                 |> build (setParams targetDetails)
                 |> ignore 
-
+                
                 copyMSDeployEnvs targetDetails
                 copyInstallerScript targetDetails
                 zipPackage targetDetails
@@ -167,6 +174,7 @@ let packageQuicksilverTopshelfServices (services:QuicksilverTopshelfService list
             CopyDir (outProjDir + "tools" + sep + "config-transform") (qsDir + sep + ".." + sep + ".." + sep + "config-transform" + sep + "tools" + sep) (fun _ -> true)
             CopyDir (outProjDir + "scripts" + sep) (qsDir + "topshelf" + sep + "scripts" + sep) (fun _ -> true)
             FileUtils.cp (qsDir + "topshelf" + sep + "boot" + sep + "install_topshelf.bat") (outProjDir + "install.bat")
+            FileUtils.cp (qsDir + "topshelf" + sep + "boot" + sep + "fake.deploy.fsx") (outProjDir + "fake.deploy.fsx")
             
             let envDirForProject = (rootDir + sep + "env" + sep + tss.name + sep)
 
@@ -202,7 +210,7 @@ let packageQuicksilverTopshelfServices (services:QuicksilverTopshelfService list
                     Files = [source, None, None]
                     Description = tss.name
                     Project = tss.name
-                    Version = v
+                    Version = getNugetVersion v
                     OutputPath = targetDir
                 }
                 ) (qsDir + "nuget" + sep + "fake.deploy.nuspec")
