@@ -1,7 +1,8 @@
-//#r "../../fake/tools/FakeLib.dll"
+#r "../../fake/tools/FakeLib.dll"
 
 open Fake
 open Fake.Git
+open Fake.NuGet
 open System
 
 let sep = EnvironmentHelper.directorySeparator
@@ -148,6 +149,7 @@ let packageQuicksilverWebsites (csprojGlobs:string list) =
 type QuicksilverTopshelfService = {
     name: string
     binaryPath : string
+    authors : string list
 }
 
 let packageQuicksilverTopshelfServices (services:QuicksilverTopshelfService list) = 
@@ -191,7 +193,18 @@ let packageQuicksilverTopshelfServices (services:QuicksilverTopshelfService list
             
             ensureDirectory targetDir
 
-            !!(source + "**/*.*")
-            |> Zip source (targetDir + version.Value + ".zip")
+            //!!(source + "**/*.*")
+            //|> Zip source (targetDir + version.Value + ".zip")
+
+            NuGet (fun p ->
+                {p with
+                    Authors = tss.authors
+                    Files = [source, None, None]
+                    Description = tss.name
+                    Project = tss.name
+                    Version = v
+                    OutputPath = targetDir
+                }
+                ) (qsDir + "nuget" + sep + "fake.deploy.nuspec")
       )
 
