@@ -204,6 +204,10 @@ let packageQuicksilverTopshelfServices (services:QuicksilverTopshelfService list
             //!!(source + "**/*.*")
             //|> Zip source (targetDir + version.Value + ".zip")
 
+            let nuspecPath = qsDir + "nuget" + sep + "fake.deploy.nuspec"
+            if fileExists nuspecPath = false then
+                FileHelper.CopyFile nuspecPath (qsDir + "nuget" + sep + "fake.deploy.nuspectemplate")
+
             NuGet (fun p ->
                 {p with
                     Authors = tss.authors
@@ -213,6 +217,6 @@ let packageQuicksilverTopshelfServices (services:QuicksilverTopshelfService list
                     Version = getNugetVersion v
                     OutputPath = targetDir
                 }
-                ) (qsDir + "nuget" + sep + "fake.deploy.nuspec")
+                ) nuspecPath
       )
 
