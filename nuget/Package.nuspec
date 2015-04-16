@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>quicksilver</id>
-    <version>0.0.9-alpha</version>
+    <version>0.0.10-alpha</version>
     <authors>ashic</authors>
     <owners>ashic</owners>
     <licenseUrl>https://raw.githubusercontent.com/heartysoft/quicksilver/master/LICENSE</licenseUrl>
@@ -13,6 +13,6 @@
     <tags>ci msdeploy</tags>
   </metadata>
   <files>
-    <file src="..\packages\quickSilver\tools\**\*.*" target=".\" />
+    <file src="..\packages\quickSilver\tools\**\*.*" target=".\tools\" />
   </files>
 </package>
