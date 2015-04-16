@@ -18,7 +18,7 @@ echo %1
 echo %publish%
 
 
-if "%publish%"=="1" (
+if %publish%=="1" (
     echo "publishing..."
     for %%f in (.\nuget\*.nupkg) do (
         set filename=%%f
