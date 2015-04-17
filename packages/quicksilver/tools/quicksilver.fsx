@@ -97,7 +97,14 @@ let private getPublishRoot () =
     | "ci" -> ciPublishRoot
     | _ -> publishRoot
 
-let packageQuicksilverWebsites (csprojGlobs:string list) = 
+type QuicksilverWebsite = {
+    glob: string
+    authors : string list
+}
+
+let private defaultWebsite = {glob = ""; authors = []}
+
+let packageQuicksilverWebsites (websites:(QuicksilverWebsite -> QuicksilverWebsite) list) = 
     if version.IsNone then
         trace "Commit not tagged with v* tag. Not packaging quicksilver websites."
     else
@@ -128,18 +135,41 @@ let packageQuicksilverWebsites (csprojGlobs:string list) =
             trace <| sprintf "copying installer script" 
             let websiteScript = qsDir + "website" + sep + "boot" + sep + "install_website.bat"
             FileUtils.cp websiteScript (outProjDir + "install.bat")
+            FileUtils.cp (qsDir + "website" + sep + "boot" + sep + "fake.deploy.fsx") (outProjDir + "fake.deploy.fsx")
 
-        let zipPackage (projName, outProjDir) = 
+//        let zipPackage (projName, outProjDir) = 
+//            let targetDir = getPublishRoot() + projName + @"/" 
+//            trace <| sprintf "Publishing website msdeploy package from %A  to %A" outProjDir targetDir
+//            ensureDirectory targetDir
+//            !! (outProjDir + "**/*.*")
+//            |> Zip outProjDir (targetDir + version.Value + ".zip") 
+
+        let nuGetPackage (projName, outProjDir) website = 
             let targetDir = getPublishRoot() + projName + @"/" 
             trace <| sprintf "Publishing website msdeploy package from %A  to %A" outProjDir targetDir
             ensureDirectory targetDir
-            !! (outProjDir + "**/*.*")
-            |> Zip outProjDir (targetDir + version.Value + ".zip") 
 
-        csprojGlobs
-        |> List.iter (fun pattern ->
-            !!pattern
-            |> Seq.iter (fun proj ->
+            let nuspecPath = qsDir + "nuget" + sep + "fake.deploy.nuspec"
+            if fileExists nuspecPath = false then
+                FileHelper.CopyFile nuspecPath (qsDir + "nuget" + sep + "fake.deploy.nuspectemplate")
+            
+            NuGet (fun p ->
+                {p with
+                    Authors = website.authors
+                    Files = [outProjDir, None, None]
+                    Description = projName
+                    Project = projName
+                    Version = getNugetVersion v
+                    OutputPath = targetDir
+                }
+                ) nuspecPath
+
+        websites
+        |> List.iter (fun definer ->
+            let website = definer defaultWebsite
+            !!website.glob
+            |> Seq.head
+            |> fun proj ->
                 let targetDetails = getTargetDetails proj v
                 
                 proj
@@ -148,8 +178,7 @@ let packageQuicksilverWebsites (csprojGlobs:string list) =
                 
                 copyMSDeployEnvs targetDetails
                 copyInstallerScript targetDetails
-                zipPackage targetDetails
-            )
+                nuGetPackage targetDetails website
         )
 
 
