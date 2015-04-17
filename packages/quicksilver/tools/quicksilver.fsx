@@ -1,7 +1,8 @@
-//#r "../../fake/tools/FakeLib.dll"
+#r "../../fake/tools/FakeLib.dll"
 
 open Fake
 open Fake.Git
+open Fake.NuGet
 open System
 
 let sep = EnvironmentHelper.directorySeparator
@@ -24,11 +25,18 @@ let private getGitVersion() =
         | _ -> None
 
 
+let private getNugetVersion (version:string) = 
+    if(version.StartsWith("v")) then
+        version.Substring(1)
+    else
+        failwith "version must be in the form of v0.0.1 or v0.0.1-alpha. This follows NuGet versioning prefixed with v."
+
 let mutable version = 
     let buildVersion = getBuildParam "version"
     if buildVersion = "" then
         getGitVersion()
     else
+        //maybe check that it's a vn.m.o[-foo] tag.
         Some(buildVersion)
         
 let restoreNugetPackagesTo pkgDir = 
@@ -89,7 +97,14 @@ let private getPublishRoot () =
     | "ci" -> ciPublishRoot
     | _ -> publishRoot
 
-let packageQuicksilverWebsites (csprojGlobs:string list) = 
+type QuicksilverWebsite = {
+    glob: string
+    authors : string list
+}
+
+let private defaultWebsite = {glob = ""; authors = []}
+
+let packageQuicksilverWebsites (websites:(QuicksilverWebsite -> QuicksilverWebsite) list) = 
     if version.IsNone then
         trace "Commit not tagged with v* tag. Not packaging quicksilver websites."
     else
@@ -120,34 +135,57 @@ let packageQuicksilverWebsites (csprojGlobs:string list) =
             trace <| sprintf "copying installer script" 
             let websiteScript = qsDir + "website" + sep + "boot" + sep + "install_website.bat"
             FileUtils.cp websiteScript (outProjDir + "install.bat")
+            FileUtils.cp (qsDir + "website" + sep + "boot" + sep + "fake.deploy.fsx") (outProjDir + "fake.deploy.fsx")
 
-        let zipPackage (projName, outProjDir) = 
+//        let zipPackage (projName, outProjDir) = 
+//            let targetDir = getPublishRoot() + projName + @"/" 
+//            trace <| sprintf "Publishing website msdeploy package from %A  to %A" outProjDir targetDir
+//            ensureDirectory targetDir
+//            !! (outProjDir + "**/*.*")
+//            |> Zip outProjDir (targetDir + version.Value + ".zip") 
+
+        let nuGetPackage (projName, outProjDir) website = 
             let targetDir = getPublishRoot() + projName + @"/" 
             trace <| sprintf "Publishing website msdeploy package from %A  to %A" outProjDir targetDir
             ensureDirectory targetDir
-            !! (outProjDir + "**/*.*")
-            |> Zip outProjDir (targetDir + version.Value + ".zip") 
 
-        csprojGlobs
-        |> List.iter (fun pattern ->
-            !!pattern
-            |> Seq.iter (fun proj ->
+            let nuspecPath = qsDir + "nuget" + sep + "fake.deploy.nuspec"
+            if fileExists nuspecPath = false then
+                FileHelper.CopyFile nuspecPath (qsDir + "nuget" + sep + "fake.deploy.nuspectemplate")
+            
+            NuGet (fun p ->
+                {p with
+                    Authors = website.authors
+                    Files = [outProjDir, None, None]
+                    Description = projName
+                    Project = projName
+                    Version = getNugetVersion v
+                    OutputPath = targetDir
+                }
+                ) nuspecPath
+
+        websites
+        |> List.iter (fun definer ->
+            let website = definer defaultWebsite
+            !!website.glob
+            |> Seq.head
+            |> fun proj ->
                 let targetDetails = getTargetDetails proj v
                 
                 proj
                 |> build (setParams targetDetails)
                 |> ignore 
-
+                
                 copyMSDeployEnvs targetDetails
                 copyInstallerScript targetDetails
-                zipPackage targetDetails
-            )
+                nuGetPackage targetDetails website
         )
 
 
 type QuicksilverTopshelfService = {
     name: string
     binaryPath : string
+    authors : string list
 }
 
 let packageQuicksilverTopshelfServices (services:QuicksilverTopshelfService list) = 
@@ -165,6 +203,7 @@ let packageQuicksilverTopshelfServices (services:QuicksilverTopshelfService list
             CopyDir (outProjDir + "tools" + sep + "config-transform") (qsDir + sep + ".." + sep + ".." + sep + "config-transform" + sep + "tools" + sep) (fun _ -> true)
             CopyDir (outProjDir + "scripts" + sep) (qsDir + "topshelf" + sep + "scripts" + sep) (fun _ -> true)
             FileUtils.cp (qsDir + "topshelf" + sep + "boot" + sep + "install_topshelf.bat") (outProjDir + "install.bat")
+            FileUtils.cp (qsDir + "topshelf" + sep + "boot" + sep + "fake.deploy.fsx") (outProjDir + "fake.deploy.fsx")
             
             let envDirForProject = (rootDir + sep + "env" + sep + tss.name + sep)
 
@@ -191,7 +230,22 @@ let packageQuicksilverTopshelfServices (services:QuicksilverTopshelfService list
             
             ensureDirectory targetDir
 
-            !!(source + "**/*.*")
-            |> Zip source (targetDir + version.Value + ".zip")
+            //!!(source + "**/*.*")
+            //|> Zip source (targetDir + version.Value + ".zip")
+
+            let nuspecPath = qsDir + "nuget" + sep + "fake.deploy.nuspec"
+            if fileExists nuspecPath = false then
+                FileHelper.CopyFile nuspecPath (qsDir + "nuget" + sep + "fake.deploy.nuspectemplate")
+
+            NuGet (fun p ->
+                {p with
+                    Authors = tss.authors
+                    Files = [source, None, None]
+                    Description = tss.name
+                    Project = tss.name
+                    Version = getNugetVersion v
+                    OutputPath = targetDir
+                }
+                ) nuspecPath
       )
 

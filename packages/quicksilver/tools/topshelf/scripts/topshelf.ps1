@@ -107,6 +107,9 @@ if($existing){
         }
 
         write-host "service $servicename uninstalled..."
+        write-host "waiting 5 seconds for teardown. if deployment fails, consider waiting a bit for process to die and retrying..."
+        start-sleep -s 5
+        write-host "commencing."
     }
 }
 else {
