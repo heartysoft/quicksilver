@@ -24,8 +24,8 @@ match envOpt with
     printfn "environment not specified."
 
 let pr = Process.Start(p)
-pr.OutputDataReceived.Add(fun args -> printfn "Info: %A" args.Data)
-pr.ErrorDataReceived.Add(fun args -> System.Console.Error.WriteLine("Error: {0}", args.Data))
+pr.OutputDataReceived.Add(fun args -> printfn "%A" args.Data)
+pr.ErrorDataReceived.Add(fun args -> System.Console.Error.WriteLine(args.Data))
 pr.BeginOutputReadLine();
 pr.BeginErrorReadLine();
 
@@ -37,4 +37,3 @@ printfn "installation completed. Exit code: %A" exitCode
 
 if exitCode <> 0 then
     failwith "Installation failed"
-
