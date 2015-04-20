@@ -181,21 +181,23 @@ let packageQuicksilverWebsites (websites:(QuicksilverWebsite -> QuicksilverWebsi
                 nuGetPackage targetDetails website
         )
 
-
 type QuicksilverTopshelfService = {
     name: string
     binaryPath : string
     authors : string list
 }
 
-let packageQuicksilverTopshelfServices (services:QuicksilverTopshelfService list) = 
+let private defaultTopshelfService = {name=""; binaryPath=""; authors=[]}
+
+let packageQuicksilverTopshelfServices (services:(QuicksilverTopshelfService -> QuicksilverTopshelfService) list) = 
     if version.IsNone then
         trace "Commit not tagged with v* tag. Not packaging quicksilver topshelf services."
     else
         let v = version.Value
         trace <| sprintf "Packaging quicksilver services for version %A." v
         services
-        |> List.iter (fun tss ->
+        |> List.iter (fun tssFunc ->
+            let tss = tssFunc defaultTopshelfService
             let pattern =  tss.binaryPath.Replace("@buildMode@", buildMode)
             let binaryPath = !!pattern |> Seq.head
             let outProjDir = outDir + tss.name + sep + version.Value + sep

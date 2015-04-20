@@ -26,13 +26,13 @@ Target "Default" (fun x ->
     //list of glob patterns to test with nunit. Requires nunit.runners to be installed in a subdirectory.
     //testWithNUnit [@"**\bin\@buildMode@\*Tests.dll"]
     //Glob patterns for websites to create quicksilver packages for.
-    packageQuicksilverWebsites [
-        fun web -> {web with glob="**/MyWebAppForDeployment.csproj"; authors=authors}
-    ]
-    //Same, but for services
-//    packageQuicksilverTopshelfServices [
-//        {name="MyWindowsService"; binaryPath="**/MyWindowsService/bin/@buildMode@/"; authors=authors}
+//    packageQuicksilverWebsites [
+//        fun web -> {web with glob="**/MyWebAppForDeployment.csproj"; authors=authors}
 //    ]
+    //Same, but for services
+    packageQuicksilverTopshelfServices [
+        fun p -> {p with name="MyWindowsService"; binaryPath="**/MyWindowsService/bin/@buildMode@/"; authors=authors}
+    ]
 )
 
 RunTargetOrDefault "Default"

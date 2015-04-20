@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>quicksilver</id>
-    <version>0.0.14-alpha</version>
+    <version>0.0.15-alpha</version>
     <authors>ashic</authors>
     <owners>ashic</owners>
     <licenseUrl>https://raw.githubusercontent.com/heartysoft/quicksilver/master/LICENSE</licenseUrl>
