@@ -20,7 +20,7 @@ $r = (get-item $scriptPath).Parent.FullName
 
 write-host "starting processing of topshelf service..."
 
-if($environ -eq "") {
+if($environ-eq "") {
     write-error "Environment not specified. Usage: topshelf_install.bat [env]"   
 }
 
@@ -76,16 +76,16 @@ if($runAsSystem){
     $identity = '--networkservice'
 } elseif($interactive){
     if("$user".trim() -ne ""){
-      $identity = "-username ""$user"" --interactive"  
+      $identity = "-username `"$user`" --interactive"  
     } else {
       $identity = "--interactive"  
     }
 } else {
-    if(("$user".trim() -eq "") -or "$password".trim() -eq ""){
+    if("$user".trim() -eq "" -or "$password".trim() -eq ""){
         write-error "Installation is not for system, local service, or network service, and interactive was not requested. In this case, username and password are required."
     }
 
-    $identity = "-username=`"$user`" -password=`"$password`""
+    $identity = "-username `"$user`" -password `"$password`""
 }
 
 write-host "installation identity selected..."
@@ -153,15 +153,15 @@ echo "Target executable: $exePath"
 if(-not($existing) -or $reinstall){
     write-host "Installing service $serviceName using $exePath"
     
-    $installArgs = "install $identity -servicename:$serviceName -description `"$serviceDescription`" -displayname `"$displayName`""
+    $installArgs = "install $identity -servicename `"$serviceName`" -description `"$serviceDescription`" -displayname `"$displayName`""
     #$wrappedInstallCommand = "$installCommand'"
     #write-host $wrappedInstallCommand
-    
-    exec {
-        cmd /C "$exePath $installArgs" | echo
-    }
 
-    write-host "Service installed"
+    exec {
+      cmd /C "$exePath $installArgs" | echo
+    }
+    
+    write-host "Service installed."
 }
 
 write-host "Starting service $serviceName"
