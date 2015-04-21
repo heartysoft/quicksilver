@@ -11,7 +11,7 @@ $web.AppPools | foreach {
     $pool = $_
     $poolName = $pool.Name
     write-host "------------------------------------------"
-    write-host "processing application pool $poolName"
+    write-host "processing application pool $poolName)"
     write-host "------------------------------------------"
     #App Pool
 
@@ -123,7 +123,7 @@ $web.Websites | foreach {
 
     write-host "processing additional application for website..."
     write-host "removing existing applications..."
-    write-host $website.Name
+    
     Get-WebApplication -site $website.Name | Remove-WebApplication -site $website.Name
     write-host "removed existing applications..."
 
