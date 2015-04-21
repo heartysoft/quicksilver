@@ -125,7 +125,7 @@ let packageQuicksilverWebsites (websites:(QuicksilverWebsite -> QuicksilverWebsi
                     ]
             }
 
-        let copyMSDeployEnvs (projName, outProjDir) = 
+        let copyEnvs (projName, outProjDir) = 
             let target = rootDir + @"env" + sep + projName
             trace <| sprintf "copying tokenization files from %s" target
             if(FileSystemHelper.directoryExists(target)) then
@@ -136,6 +136,7 @@ let packageQuicksilverWebsites (websites:(QuicksilverWebsite -> QuicksilverWebsi
             let websiteScript = qsDir + "website" + sep + "boot" + sep + "install_website.bat"
             FileUtils.cp websiteScript (outProjDir + "install.bat")
             FileUtils.cp (qsDir + "website" + sep + "boot" + sep + "fake.deploy.fsx") (outProjDir + "fake.deploy.fsx")
+            FileUtils.cp (qsDir + "website" + sep + "boot" + sep + "website_setup.ps1") (outProjDir + "website_setup.ps1")
 
 //        let zipPackage (projName, outProjDir) = 
 //            let targetDir = getPublishRoot() + projName + @"/" 
@@ -176,7 +177,7 @@ let packageQuicksilverWebsites (websites:(QuicksilverWebsite -> QuicksilverWebsi
                 |> build (setParams targetDetails)
                 |> ignore 
                 
-                copyMSDeployEnvs targetDetails
+                copyEnvs targetDetails
                 copyInstallerScript targetDetails
                 nuGetPackage targetDetails website
         )
