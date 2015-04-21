@@ -11,7 +11,7 @@ $web.AppPools | foreach {
     $pool = $_
     $poolName = $pool.Name
     write-host "------------------------------------------"
-    write-host "processing application pool $poolName)"
+    write-host "processing application pool $poolName"
     write-host "------------------------------------------"
     #App Pool
 
