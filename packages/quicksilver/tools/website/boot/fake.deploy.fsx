@@ -17,14 +17,16 @@ let iisFile =
     | Some(e) -> sprintf "iis.%s.pson" e
     | None -> "iis.pson"
 
-if File.Exists iisFile then
+let iisFilePath = Path.Combine(__SOURCE_DIRECTORY__,  iisFile)
+
+if File.Exists iisFilePath then
     printfn "IIS file %s found. Running..." iisFile
-    let p = new ProcessStartInfo("powershell.exe")
+    let p = new ProcessStartInfo(@"C:\Windows\SysNative\WindowsPowerShell\v1.0\powershell.exe")
     p.UseShellExecute <- false
     p.RedirectStandardOutput <- true
     p.RedirectStandardError <- true
     p.WorkingDirectory <- __SOURCE_DIRECTORY__
-    p.Arguments <- sprintf "-ExecutionPolicy RemoteSigned website_setup.ps1 %s" iisFile
+    p.Arguments <- sprintf "-ExecutionPolicy RemoteSigned -File website_setup.ps1 %s" iisFilePath
 
     printfn "ensuring iis setup matches %s" iisFile
 
@@ -45,7 +47,7 @@ if File.Exists iisFile then
     else
         printfn "iis initialisation complete"
 else
-    printfn "IIS file server(.%s).pson not found. Skipping iis initialisation." iisFile
+    printfn "IIS file %s not found. Skipping iis initialisation." iisFile
 
 printfn "########################################################"
 printfn "step: website installation"

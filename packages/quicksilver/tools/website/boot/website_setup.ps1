@@ -3,23 +3,27 @@ $web = gc $psonFile | Out-String | iex
 
 import-module WebAdministration
 
+$ErrorActionPreference = "stop"
+
+write-host "pson file is $psonFile"
 
 $web.AppPools | foreach {
     $pool = $_
+    $poolName = $pool.Name
     write-host "------------------------------------------"
-    write-host "processing application pool $($pool.Name)"
+    write-host "processing application pool $poolName)"
     write-host "------------------------------------------"
     #App Pool
 
-    if(test-path "IIS:\AppPools\$($pool.Name)")
+    if(test-path "IIS:\AppPools\$poolName")
     {
       write-host "app pool exists."
     } else {
       write-host "app pool doesn't exist. creating..."
-      New-WebAppPool $pool.Name -Force
+      New-WebAppPool $poolName -Force
     }
 
-    $appPool = gi "IIS:\AppPools\$($pool.Name)" -ErrorAction SilentlyContinue
+    $appPool = gi "IIS:\AppPools\$poolName" -ErrorAction SilentlyContinue
 
     $changed = $false
 
@@ -123,24 +127,26 @@ $web.Websites | foreach {
     Get-WebApplication -site $website.Name | Remove-WebApplication -site $website.Name
     write-host "removed existing applications..."
 
-    $website.AdditionalApplications | foreach {
-        $app = $_
+    if($website.AdditionalApplications){
+        $website.AdditionalApplications | foreach {
+            $app = $_
         
-        write-host "------------------------------"
-        write-host "creating application $($app.Name)"
+            write-host "------------------------------"
+            write-host "creating application $($app.Name)"
 
-        if(-not(test-path $app.PhysicalPath)) {
-            write-host "path doesn't exist. ensuring: $($app.PhysicalPath)"
-            New-Item -ItemType Directory -Force -Path $app.PhysicalPath
+            if(-not(test-path $app.PhysicalPath)) {
+                write-host "path doesn't exist. ensuring: $($app.PhysicalPath)"
+                New-Item -ItemType Directory -Force -Path $app.PhysicalPath
+            }
+
+            New-WebApplication -Site $website.Name -Name $app.Name -ApplicationPool $app.AppPool -PhysicalPath $app.PhysicalPath
+        
+            write-host "application created."        
+            write-host "------------------------------"
         }
 
-        New-WebApplication -Site $website.Name -Name $app.Name -ApplicationPool $app.AppPool -PhysicalPath $app.PhysicalPath
-        
-        write-host "application created."        
-        write-host "------------------------------"
+        write-host "additional applications processed."
     }
-
-    write-host "additional applications processed."
 }
 
 write-host "all done. bye bye :)"

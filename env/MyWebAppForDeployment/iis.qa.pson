@@ -1,0 +1,23 @@
+
+@{
+    AppPools = @(@{
+        Name = "MyWebAppForDeploymentAppPool"
+        Enable32Bit = $true
+        ManagedRuntimeVersion = 'v4.0'
+        UserName = "vagrant"     #can also be NetworkService | LocalSystem | LocalService | ApplicationPoolIdentity. 
+        Password = "vagrant"     #ignored for built in accounts
+        PipeLine = "Integrated"
+    })
+
+    Websites = @(@{
+        Name = "MyWebAppForDeployment"
+        AppPool = "MyWebAppForDeploymentAppPool"
+        PhysicalPath = "C:\woohoo\WebsiteName\"
+        Port = 8976
+        SSL = $false
+        HostHeader=""
+        IpAddress="*"
+    }
+    
+    )
+}
