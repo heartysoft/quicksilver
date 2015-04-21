@@ -3,112 +3,144 @@ $web = gc $psonFile | Out-String | iex
 
 import-module WebAdministration
 
-write-host "------------------------------------------"
-write-host "processing application pool $($web.AppPool.Name)"
-write-host "------------------------------------------"
-#App Pool
 
-if(test-path "IIS:\AppPools\$($web.AppPool.Name)")
-{
-  write-host "app pool exists."
-} else {
-  write-host "app pool doesn't exist. creating..."
-  New-WebAppPool $web.AppPool.Name -Force
-}
+$web.AppPools | foreach {
+    $pool = $_
+    write-host "------------------------------------------"
+    write-host "processing application pool $($pool.Name)"
+    write-host "------------------------------------------"
+    #App Pool
 
-$appPool = gi "IIS:\AppPools\$($web.AppPool.Name)" -ErrorAction SilentlyContinue
-
-$changed = $false
-
-###################
-##Managed Runtime
-###################
-if($appPool.managedRuntimeVersion -ne $web.AppPool.ManagedRuntimeVersion) {
-    write-host "will update managed runtime version to $($web.AppPool.ManagedRuntimeVersion)."
-    $appPool.managedRuntimeVersion = $web.AppPool.ManagedRuntimeVersion
-    $changed = $true
-} else {
-    write-host "managed runtime version is already $($web.AppPool.ManagedRuntimeVersion)."
-}
-###################
-##32 bit
-###################
-if($appPool.enable32BitAppOnWin64 -ne $web.AppPool.Enable32Bit) {
-    write-host "will set enable32BitAppOnWin64 to $($web.AppPool.Enable32Bit)."
-    $appPool.enable32BitAppOnWin64 = $web.AppPool.Enable32Bit
-    $changed = $true
-} else {
-    write-host "enable32BitAppOnWin64 is already $($web.AppPool.Enable32Bit)."
-}
-
-###################
-##Process User
-###################
-write-host "processing app pool user..."
-if ((($appPool.processModel.identityType -eq "SpecificUser") -and 
-        ($appPool.processModel.userName -ne $web.AppPool.UserName)) -or 
-    (($appPool.processModel.identityType -ne "SpecificUser") -and ($appPool.processModel.identityType -ne $web.AppPool.UserName))){
-    write-host "updating app pool user..."
-    $changed = $true
-    $u = $web.AppPool.UserName
-    if(($u -eq "ApplicationPoolIdentity") -or ($u -eq "LocalSystem") -or ($u -eq "LocalService") -or ($u -eq "NetworkService")) {
-        $appPool.processModel.identityType = $u
-        write-host "will set app pool user to $($u)."
+    if(test-path "IIS:\AppPools\$($pool.Name)")
+    {
+      write-host "app pool exists."
     } else {
-        write-host "setting app pool user to specific account $($u)."
-        $appPool.processModel.identityType = 3
-        $appPool.processModel.userName = $u
-        $appPool.processModel.password = $web.AppPool.Password
+      write-host "app pool doesn't exist. creating..."
+      New-WebAppPool $pool.Name -Force
     }
-} else {
-    write-host "app pool using the correct user. no steps taken."
+
+    $appPool = gi "IIS:\AppPools\$($pool.Name)" -ErrorAction SilentlyContinue
+
+    $changed = $false
+
+    ###################
+    ##Managed Runtime
+    ###################
+    if($appPool.managedRuntimeVersion -ne $pool.ManagedRuntimeVersion) {
+        write-host "will update managed runtime version to $($pool.ManagedRuntimeVersion)."
+        $appPool.managedRuntimeVersion = $pool.ManagedRuntimeVersion
+        $changed = $true
+    } else {
+        write-host "managed runtime version is already $($pool.ManagedRuntimeVersion)."
+    }
+    ###################
+    ##32 bit
+    ###################
+    if($appPool.enable32BitAppOnWin64 -ne $pool.Enable32Bit) {
+        write-host "will set enable32BitAppOnWin64 to $($pool.Enable32Bit)."
+        $appPool.enable32BitAppOnWin64 = $pool.Enable32Bit
+        $changed = $true
+    } else {
+        write-host "enable32BitAppOnWin64 is already $($pool.Enable32Bit)."
+    }
+
+    ###################
+    ##Process User
+    ###################
+    write-host "processing app pool user..."
+    if ((($appPool.processModel.identityType -eq "SpecificUser") -and 
+            ($appPool.processModel.userName -ne $pool.UserName)) -or 
+        (($appPool.processModel.identityType -ne "SpecificUser") -and ($appPool.processModel.identityType -ne $pool.UserName))){
+        write-host "updating app pool user..."
+        $changed = $true
+        $u = $pool.UserName
+        if(($u -eq "ApplicationPoolIdentity") -or ($u -eq "LocalSystem") -or ($u -eq "LocalService") -or ($u -eq "NetworkService")) {
+            $appPool.processModel.identityType = $u
+            write-host "will set app pool user to $($u)."
+        } else {
+            write-host "setting app pool user to specific account $($u)."
+            $appPool.processModel.identityType = 3
+            $appPool.processModel.userName = $u
+            $appPool.processModel.password = $pool.Password
+        }
+    } else {
+        write-host "app pool using the correct user. no steps taken."
+    }
+
+    ###################
+    ##Pipeline
+    ###################
+    if($appPool.managedPipelineMode -ne $pool.Pipeline) {
+        write-host "will set pipeline mode to $($pool.Pipeline)."
+        $appPool.managedPipelineMode = $pool.Pipeline
+        $changed = $true
+    } else {
+        write-host "pipeline mode is already $($pool.Pipeline)."
+    }
+
+
+
+    if($changed){
+        write-host "changes required...applying..."
+        $appPool | set-item
+        write-host "changes applied."
+    } else {
+        write-host "no change required."
+    }
+
+
+    write-host "finished processing app pool."
+    write-host "##########################################"
 }
 
-###################
-##Pipeline
-###################
-if($appPool.managedPipelineMode -ne $web.AppPool.Pipeline) {
-    write-host "will set pipeline mode to $($web.AppPool.Pipeline)."
-    $appPool.managedPipelineMode = $web.AppPool.Pipeline
-    $changed = $true
-} else {
-    write-host "pipeline mode is already $($web.AppPool.Pipeline)."
-}
+$web.Websites | foreach {
+    $website = $_
+    write-host "processing website $($website.Name)"
+    write-host "##########################################"
+
+    $ws = gi "IIS:\Sites\$($website.Name)" -ErrorAction SilentlyContinue
+
+    if($ws){
+       write-host "website exists. removing..."
+       $ws | Remove-Website
+    }
 
 
-
-if($changed){
-    write-host "changes required...applying..."
-    $appPool | set-item
-    write-host "changes applied."
-} else {
-    write-host "no change required."
-}
-
-
-write-host "finished processing app pool."
-write-host "##########################################"
-write-host "processing website $($web.Website.Name)"
-write-host "##########################################"
-
-$ws = gi "IIS:\Sites\$($web.Website.Name)" -ErrorAction SilentlyContinue
-
-if($ws){
-   write-host "website exists. removing..."
-   $ws | Remove-Website
-}
-
-
-write-host "creating website..."
+    write-host "creating website..."
    
-if("$($web.Website.IpAddress)".trim() -eq ""){
-    $web.Website.IpAddress = "*"
+    if("$($website.IpAddress)".trim() -eq ""){
+        $website.IpAddress = "*"
+    }
+
+    New-Website $website.Name -Force -PhysicalPath $website.PhysicalPath -Port $website.Port `
+    -Ssl:$website.SSL -HostHeader $website.HostHeader -IPAddress $website.IpAddress -ApplicationPool $website.AppPool
+
+    write-host "website created"
+
+    write-host "processing additional application for website..."
+    write-host "removing existing applications..."
+    write-host $website.Name
+    Get-WebApplication -site $website.Name | Remove-WebApplication -site $website.Name
+    write-host "removed existing applications..."
+
+    $website.AdditionalApplications | foreach {
+        $app = $_
+        
+        write-host "------------------------------"
+        write-host "creating application $($app.Name)"
+
+        if(-not(test-path $app.PhysicalPath)) {
+            write-host "path doesn't exist. ensuring: $($app.PhysicalPath)"
+            New-Item -ItemType Directory -Force -Path $app.PhysicalPath
+        }
+
+        New-WebApplication -Site $website.Name -Name $app.Name -ApplicationPool $app.AppPool -PhysicalPath $app.PhysicalPath
+        
+        write-host "application created."        
+        write-host "------------------------------"
+    }
+
+    write-host "additional applications processed."
 }
-
-New-Website $web.WebSite.Name -Force -PhysicalPath $web.Website.PhysicalPath -Port $web.Website.Port `
--Ssl:$web.Website.SSL -HostHeader $web.Website.HostHeader -IPAddress $web.Website.IpAddress -ApplicationPool $web.Website.AppPool
-
-write-host "website created"
-
 
 write-host "all done. bye bye :)"

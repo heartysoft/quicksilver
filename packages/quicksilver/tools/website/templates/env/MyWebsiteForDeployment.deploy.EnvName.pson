@@ -1,21 +1,30 @@
 
 @{
-    AppPool = @{
-        Name = "WebsiteNameAppPool"
+    AppPools = @(@{
+        Name = "AppPoolName"
         Enable32Bit = $true
         ManagedRuntimeVersion = 'v4.0'
-        UserName = "vagrant" # Or NetworkService, LocalService, LocalSystem, ApplicationPoolIdentity
-        Password = "vagrant"
+        UserName = "vagrant"     #can also be NetworkService | LocalSystem | LocalService | ApplicationPoolIdentity. 
+        Password = "vagrant"     #ignored for built in accounts
         PipeLine = "Integrated"
-    }
+    })
 
-    Website = @{
+    Websites = @(@{
         Name = "WebsiteName"
-        AppPool = "WebsiteNameAppPool"
-        PhysicalPath = "D:\woohoo\LalaWeb\"
+        AppPool = "AppPoolName"
+        PhysicalPath = "D:\woohoo\WebsiteName\"
         Port = 8976
-        SSL = $false               #for https
-        HostHeader="dev.hsft.com"  #can be empty
+        SSL = $false
+        HostHeader="dev.hsft.com"
         IpAddress="*"
+        AdditionalApplications = @(
+            @{
+                Name = "AppName"
+                AppPool = "AppPoolName"
+                PhysicalPath = "D:\woohoo\AppName\"
+            }
+        )
     }
+    
+    )
 }
