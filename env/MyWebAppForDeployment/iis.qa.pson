@@ -14,9 +14,10 @@
         AppPool = "MyWebAppForDeploymentAppPool"
         PhysicalPath = "C:\woohoo\WebsiteName\"
         Port = 8976
-        SSL = $false
+        SSL = $false	#can be true
         HostHeader=""
-        IpAddress="*"
+        IpAddress="*"	#or ip address
+	CertificatePath = "cert:\localMachine\my" #ignored if not ssl
     }
     
     )

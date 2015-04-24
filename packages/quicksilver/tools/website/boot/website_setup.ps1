@@ -121,6 +121,26 @@ $web.Websites | foreach {
 
     write-host "website created"
 
+    if(-not $website.SSL){write-host "Not using SSL. Proceeding"} else {
+        if(-not $website.CertificatePath) { write-host "No certificates specified. Skipping attaching to certificate" } else {       
+    
+            $ip = $website.IpAddress
+            if($ip -eq "*"){$ip = "0.0.0.0"}
+            $binding = "IIS:\SSLBindings\$ip!$($website.Port)"
+
+            if(test-path $binding) {
+                write-host "removing IIS SSL binding."
+                remove-item $binding
+            }
+
+            $cert = dir $website.CertificatePath
+            write-host "attaching ssl binding to certificate..."
+            gi "$($website.CertificatePath)\$($cert.ThumbPrint)" | new-item $binding
+            write-host "SSL certificate attached."
+        }
+
+    }
+
     write-host "processing additional application for website..."
     write-host "removing existing applications..."
     

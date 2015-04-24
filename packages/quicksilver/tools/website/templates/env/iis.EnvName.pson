@@ -16,7 +16,8 @@
         Port = 8976
         SSL = $false
         HostHeader="dev.hsft.com"
-        IpAddress="*"
+        IpAddress="*"		#or ip address
+	CertificatePath = "cert:\localMachine\my" #ignored if not ssl
         AdditionalApplications = @(
             @{
                 Name = "AppName"
