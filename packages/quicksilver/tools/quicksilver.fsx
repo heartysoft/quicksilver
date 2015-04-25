@@ -154,6 +154,8 @@ let packageQuicksilverWebsites (websites:(QuicksilverWebsite -> QuicksilverWebsi
             if fileExists nuspecPath = false then
                 FileHelper.CopyFile nuspecPath (qsDir + "nuget" + sep + "fake.deploy.nuspectemplate")
             
+            rootDir + sep + "nuget" |> ensureDirectory
+
             NuGet (fun p ->
                 {p with
                     Authors = website.authors
@@ -239,6 +241,8 @@ let packageQuicksilverTopshelfServices (services:(QuicksilverTopshelfService -> 
             let nuspecPath = qsDir + "nuget" + sep + "fake.deploy.nuspec"
             if fileExists nuspecPath = false then
                 FileHelper.CopyFile nuspecPath (qsDir + "nuget" + sep + "fake.deploy.nuspectemplate")
+            
+            rootDir + sep + "nuget" |> ensureDirectory
 
             NuGet (fun p ->
                 {p with
