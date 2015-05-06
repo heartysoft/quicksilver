@@ -291,12 +291,19 @@ let createQsNugetPackage (propsSetter: QsNuGetProps -> QsNuGetProps) =
 let private defaultRoundhousePackage = {name=""; folder=""; authors = []}
 
 let createRoundhousePackage (paramSetter : RoundhousePackage -> RoundhousePackage) = 
+    let p = defaultRoundhousePackage |> paramSetter
+    let outDir = getPublishRoot() + p.name + sep 
+    let rhVersion = System.IO.File.ReadAllText(System.IO.Path.Combine(p.folder, "version.txt")).Trim()
+
+    let nupkg = outDir + p.name + "." + rhVersion + ".nupkg"
+    if System.IO.File.Exists(nupkg) then
+        failwith <| sprintf "Nuget Package %s already exists. Aborting." nupkg
+    
     RestorePackageId (
         fun p -> { p with ExcludeVersion=true; OutputPath=packagesDir }) "roundhouse"
-    let p = defaultRoundhousePackage |> paramSetter
     FileHelper.CopyFile (p.folder) (packagesDir + sep + "roundhouse" + sep + "bin" + sep + "rh.exe")
 
-    let rhVersion = System.IO.File.ReadAllText(System.IO.Path.Combine(p.folder, "version.txt")).Trim()
+    
     
     let folder = if System.IO.Path.IsPathRooted(p.folder) then p.folder else System.IO.Path.Combine(rootDir + p.folder)
     let fi = directoryInfo folder
