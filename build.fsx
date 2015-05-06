@@ -14,10 +14,9 @@ ciPublishRoot <- @"D:\Derp\"
 //specifying version explicitly here will override any other versioning mechanism in place.
 //version <- Some("1.5")
 
-//Needed if auto package restore doesn't work. Sometimes the case with BCL builds, etc.
-restoreNugetPackagesTo "./packages"
-
 Target "Default" (fun x ->
+    //Needed if auto package restore doesn't work. Sometimes the case with BCL builds, etc.
+    restoreNugetPackagesTo "./packages"    
     let authors = ["ashic"]
     //also, CleanDirs [...]
     CleanDir outDir                              
@@ -33,6 +32,10 @@ Target "Default" (fun x ->
 //    packageQuicksilverTopshelfServices [
 //        fun p -> {p with name="MyWindowsService"; binaryPath="**/MyWindowsService/bin/@buildMode@/"; authors=authors}
  //   ]
+)
+
+Target "PackRoundhouse" (fun x ->
+    createRoundhousePackage (fun p -> {p with name="QSTest"; authors = ["ashic"]; folder="./db/"})    
 )
 
 RunTargetOrDefault "Default"

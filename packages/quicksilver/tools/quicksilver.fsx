@@ -12,11 +12,11 @@ trace <| sprintf "build environment is %s" builder
 let rootDir = FileSystemHelper.currentDirectory +  sep
 let buildMode = getBuildParamOrDefault "buildMode" "Release"
 let qsDir =  __SOURCE_DIRECTORY__ + sep
+let packagesDir = (FileSystemHelper.directoryInfo qsDir).Parent.Parent.FullName
 let outDir = rootDir + "out" + sep
 let optimize = getBuildParamOrDefault "optimize" "true"
 let mutable publishRoot = rootDir + "deploy" + sep
 let mutable ciPublishRoot = rootDir + "deploy" + sep
-
 
 let private getGitVersion() = 
     try
@@ -138,13 +138,6 @@ let packageQuicksilverWebsites (websites:(QuicksilverWebsite -> QuicksilverWebsi
             FileUtils.cp (qsDir + "website" + sep + "boot" + sep + "fake.deploy.fsx") (outProjDir + "fake.deploy.fsx")
             FileUtils.cp (qsDir + "website" + sep + "boot" + sep + "website_setup.ps1") (outProjDir + "website_setup.ps1")
 
-//        let zipPackage (projName, outProjDir) = 
-//            let targetDir = getPublishRoot() + projName + @"/" 
-//            trace <| sprintf "Publishing website msdeploy package from %A  to %A" outProjDir targetDir
-//            ensureDirectory targetDir
-//            !! (outProjDir + "**/*.*")
-//            |> Zip outProjDir (targetDir + version.Value + ".zip") 
-
         let nuGetPackage (projName, outProjDir) website = 
             let targetDir = getPublishRoot() + projName + @"/" 
             trace <| sprintf "Publishing website msdeploy package from %A  to %A" outProjDir targetDir
@@ -256,3 +249,62 @@ let packageQuicksilverTopshelfServices (services:(QuicksilverTopshelfService -> 
                 ) nuspecPath
       )
 
+type RoundhousePackage = {
+    name : string;
+    folder: string;
+    authors : string list
+}
+
+
+type QsNuGetProps = {
+    Authors : string list
+    Files : (string * string option * string option) list
+    Name : string
+    Version : string
+}
+
+let defaultQsNuGetProps = {
+    Authors = []; Files = []; Name=""; Version=""
+}
+
+let createQsNugetPackage (propsSetter: QsNuGetProps -> QsNuGetProps) = 
+    let props = defaultQsNuGetProps |> propsSetter
+    rootDir + sep + "nuget" |> ensureDirectory 
+    let nuspecPath = qsDir + "nuget" + sep + "fake.deploy.nuspec"
+    if fileExists nuspecPath = false then
+        FileHelper.CopyFile nuspecPath (qsDir + "nuget" + sep + "fake.deploy.nuspectemplate")
+    
+    let outDir = getPublishRoot() + props.Name + sep 
+    outDir |> ensureDirectory
+    
+    NuGet (fun n ->
+        {n with
+            Authors = props.Authors
+            Files = props.Files
+            Description = props.Name
+            Project = props.Name
+            Version = props.Version
+            OutputPath = outDir
+        }
+        ) nuspecPath
+
+let private defaultRoundhousePackage = {name=""; folder=""; authors = []}
+
+let createRoundhousePackage (paramSetter : RoundhousePackage -> RoundhousePackage) = 
+    RestorePackageId (
+        fun p -> { p with ExcludeVersion=true; OutputPath=packagesDir }) "roundhouse"
+    let p = defaultRoundhousePackage |> paramSetter
+    FileHelper.CopyFile (p.folder) (packagesDir + sep + "roundhouse" + sep + "bin" + sep + "rh.exe")
+
+    let rhVersion = System.IO.File.ReadAllText(System.IO.Path.Combine(p.folder, "version.txt")).Trim()
+    
+    let folder = if System.IO.Path.IsPathRooted(p.folder) then p.folder else System.IO.Path.Combine(rootDir + p.folder)
+    let fi = directoryInfo folder
+    
+    createQsNugetPackage(fun n -> 
+        {n with
+            Authors = p.authors
+            Files = [fi.FullName, None, None]
+            Name = p.name
+            Version = rhVersion
+        })
