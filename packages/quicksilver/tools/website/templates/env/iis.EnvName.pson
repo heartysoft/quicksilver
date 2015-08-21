@@ -7,6 +7,7 @@
         UserName = "vagrant"     #can also be NetworkService | LocalSystem | LocalService | ApplicationPoolIdentity. 
         Password = "vagrant"     #ignored for built in accounts
         PipeLine = "Integrated"
+        LoadUserProfile = $true  #or $false
     })
 
     Websites = @(@{

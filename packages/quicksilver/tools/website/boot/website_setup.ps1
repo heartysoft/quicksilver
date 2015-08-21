@@ -66,6 +66,9 @@ $web.AppPools | foreach {
             $appPool.processModel.identityType = 3
             $appPool.processModel.userName = $u
             $appPool.processModel.password = $pool.Password
+            if($pool.LoadUserProfile -eq $true) {
+                $appPool.processModel.LoadUserProfile = $pool.LoadUserProfile                
+            }
         }
     } else {
         write-host "app pool using the correct user. no steps taken."
